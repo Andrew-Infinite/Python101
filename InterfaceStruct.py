@@ -5,8 +5,21 @@ class ROI:
     def __init__(self, x:int, y:int,w:int,h:int) -> None:
         self.x = x
         self.y = y
-        self.width = w
-        self.height = h
+        self.w = w
+        self.h = h
+    def to_Centroid(self):
+        return ROI_Centroid(self.x+self.w//2,self.y+self.h//2,self.w,self.h)
+class ROI_Centroid:
+    def __init__(self, x:int, y:int,w:int,h:int) -> None:
+        self.x_Centroid = x
+        self.y_Centroid = y
+        self.w_Centroid = w
+        self.h_Centroid = h
+    def to_Standard(self):
+        return ROI(self.x_Centroid-self.w_Centroid//2,
+                   self.y_Centroid-self.h_Centroid//2,
+                   self.w_Centroid,
+                   self.h_Centroid)
 class Layout:
     def __init__(self,Src:List[ROI],Dst:List[ROI]):
         self.Src = Src
