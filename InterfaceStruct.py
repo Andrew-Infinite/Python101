@@ -37,4 +37,4 @@ InputResolution = ROI(0,0,1280,720)
 OutputResolution = ROI(0,0,854,480)
 InputOutputRatio = InputResolution.w/OutputResolution.w
 MaxCamSpeed=50
-Min_Change_Score = 10
+Min_Change_Score = 150

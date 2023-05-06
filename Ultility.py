@@ -19,4 +19,5 @@ def Most_Similar_ROI(Face_List:List[ROI],Prev_ROI:ROI,Dist_Score_Method) -> ROI:
         if dist_Score > cur_Dist_Score:
             ClosestROI=Object_ROI
             dist_Score = cur_Dist_Score
+    print(dist_Score)
     return Prev_ROI if dist_Score<Min_Change_Score else ClosestROI

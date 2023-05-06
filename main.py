@@ -31,14 +31,16 @@ def Mouse_Callback(event, x, y, flags, param):
         Mouse_Pos.y = y
 
 def main():
-    img = cv2.imread('Image.jpg')
-    img = cv2.resize(img, (InputResolution.w,InputResolution.h), interpolation = cv2.INTER_LINEAR)
-    FaceArray = Object_Detection_Module.Face_Detection(img)
+    cap = cv2.VideoCapture('file.mp4')
+    
     cv2.namedWindow('Video')
     cv2.setMouseCallback('Video', Mouse_Callback)
     global isMouseInterupt;isMouseInterupt=True
     
     while True:
+        ret, frame = cap.read()
+        frame = cv2.resize(frame, (InputResolution.w,InputResolution.h), interpolation = cv2.INTER_LINEAR)
+        FaceArray = Object_Detection_Module.Face_Detection(frame)
         dist = float('inf')
         print(isMouseInterupt)
         if isMouseInterupt:
@@ -51,9 +53,9 @@ def main():
                     BoundROI = face.to_Standard()
                 isMouseInterupt=False
         else:
-            Ultility.Most_Similar_ROI(FaceArray,Cam_Pos,Ultility.Score_Method_Euclidean_dist_sqr)
+            BoundROI=Ultility.Most_Similar_ROI(FaceArray,Cam_Pos,Ultility.Score_Method_Euclidean_dist_sqr)
         CamSmoothing(Cam_Pos,BoundROI)
-        OutputImg = CropOutput(img,
+        OutputImg = CropOutput(frame,
                                Layout([ROI(0,0,InputResolution.w,InputResolution.h),
                                        Cam_Pos],
                                       [ROI(0,0,OutputResolution.w,OutputResolution.h),
@@ -61,7 +63,7 @@ def main():
         cv2.imshow('Video',OutputImg)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
-  
+    cap.release()
     # closing all open windows
     cv2.destroyAllWindows()
 
