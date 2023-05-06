@@ -1,11 +1,17 @@
 import cv2
+
 from InterfaceStruct import ROI
 from InterfaceStruct import Layout
+from InterfaceStruct import InputResolution
+from InterfaceStruct import OutputResolution
+from InterfaceStruct import InputOutputRatio
+from Output_Module import CropOutput
+from pan_smoothing import CamSmoothing
 import Object_Detection_Module
 import Ultility
 
-trace_Pos = ROI(0,0,0,0)
-
+Mouse_Pos = ROI(0,0,0,0)
+Cam_Pos =ROI(0,0,0,0)
 
 
 def Mouse_Callback(event, x, y, flags, param):
@@ -20,31 +26,39 @@ def Mouse_Callback(event, x, y, flags, param):
         param (_type_): _description_
     """
     if event == cv2.EVENT_LBUTTONDOWN:
-        trace_Pos.x = x
-        trace_Pos.y = y
-        trace_Pos.height = 0
-        trace_Pos.width = 0
+        global isMouseInterupt;isMouseInterupt=True
+        Mouse_Pos.x = x
+        Mouse_Pos.y = y
+
 def main():
     img = cv2.imread('Image.jpg')
-    img = cv2.resize(img, (780, 540),interpolation = cv2.INTER_LINEAR)
+    img = cv2.resize(img, (InputResolution.w,InputResolution.h), interpolation = cv2.INTER_LINEAR)
     FaceArray = Object_Detection_Module.Face_Detection(img)
     cv2.namedWindow('Video')
     cv2.setMouseCallback('Video', Mouse_Callback)
+    global isMouseInterupt;isMouseInterupt=True
     
     while True:
-        #if w,h=0, is a mouse event, find the closest centroid ROI, else, find the most similar bounding box
-        #find 
-        dist = Ultility.sq_dist(FaceArray[0].x,FaceArray[0].y,trace_Pos.x,trace_Pos.y)
-        BoundROI = ROI(FaceArray[0].x,FaceArray[0].y,FaceArray[0].w,FaceArray[0].h)
-        for face in FaceArray:
-            face = face.to_Centroid()
-            (x,y,w,h) = (face.x_Centroid,face.y_Centroid,face.w_Centroid,face.h_Centroid)
-            if dist > Ultility.sq_dist(x,y,trace_Pos.x,trace_Pos.y):
-                dist = Ultility.sq_dist(x,y,trace_Pos.x,trace_Pos.y)
-                BoundROI = face.to_Standard()
-
-        cv2.rectangle(img, (BoundROI.x, BoundROI.y), (BoundROI.x+BoundROI.w, BoundROI.y+BoundROI.h), (255, 0, 0), 2)
-        cv2.imshow('Video',img)
+        dist = float('inf')
+        print(isMouseInterupt)
+        if isMouseInterupt:
+            for face in FaceArray:
+                face = face.to_Centroid()
+                (x,y) = (face.x_Centroid,face.y_Centroid)
+                Cur_dist = Ultility.sq_dist(x,y,Mouse_Pos.x*InputOutputRatio,Mouse_Pos.y*InputOutputRatio)
+                if dist > Cur_dist:
+                    dist = Cur_dist
+                    BoundROI = face.to_Standard()
+                isMouseInterupt=False
+        else:
+            Ultility.Most_Similar_ROI(FaceArray,Cam_Pos,Ultility.Score_Method_Euclidean_dist_sqr)
+        CamSmoothing(Cam_Pos,BoundROI)
+        OutputImg = CropOutput(img,
+                               Layout([ROI(0,0,InputResolution.w,InputResolution.h),
+                                       Cam_Pos],
+                                      [ROI(0,0,OutputResolution.w,OutputResolution.h),
+                                       ROI(OutputResolution.w+10,0,OutputResolution.h,OutputResolution.h)]))
+        cv2.imshow('Video',OutputImg)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
   
