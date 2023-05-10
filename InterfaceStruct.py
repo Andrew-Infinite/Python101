@@ -1,7 +1,7 @@
 from typing import List
 
 class ROI:
-    def __init__(self, x:int, y:int,w:int,h:int) -> None:
+    def __init__(self, x:int, y:int,w:int,h:int):
         self.x = x
         self.y = y
         self.w = w
@@ -11,7 +11,7 @@ class ROI:
     def to_Boundary_Coordinate(self):
         return (self.x,self.y,self.x+self.w,self.y+self.h)
 class ROI_Centroid:
-    def __init__(self, x:int, y:int,w:int,h:int) -> None:
+    def __init__(self, x:int, y:int,w:int,h:int):
         self.x_Centroid = x
         self.y_Centroid = y
         self.w_Centroid = w
@@ -36,5 +36,6 @@ class Layout_Handler:
 InputResolution = ROI(0,0,1280,720)
 OutputResolution = ROI(0,0,854,480)
 InputOutputRatio = InputResolution.w/OutputResolution.w
-MaxCamSpeed=50
-Min_Change_Score = 150
+MaxCamSpeedXY = 100
+MaxCamSpeedWH = 100
+Min_Change_Score = 200
